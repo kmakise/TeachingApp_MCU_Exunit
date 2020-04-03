@@ -1,0 +1,163 @@
+C51 COMPILER V9.59.0.0   UARTCOM                                                           07/17/2019 13:14:20 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE UARTCOM
+OBJECT MODULE PLACED IN .\Objects\UartCom.obj
+COMPILER INVOKED BY: D:\Keil_v5_C51\C51\BIN\C51.EXE Application\src\UartCom.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\Ap
+                    -plication\inc) DEBUG OBJECTEXTEND PRINT(.\Listings\UartCom.lst) TABS(2) OBJECT(.\Objects\UartCom.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    UartCom.c
+   4            * @author  张东
+   5            * @version V1.0.0
+   6            * @date    2019-7-16
+   7            * @brief   串口驱动相关
+   8            ******************************************************************************
+   9            */
+  10          #include "UartCom.h"
+  11          #include "reg52.h"
+  12          
+  13          #define STARTBT           0x3c
+  14          #define ENDBT             0x3e
+  15          
+  16          bit B_TX1_Busy;                               //发送忙标志
+  17          
+  18          USARTBufTypedef g_UsartRx;
+  19          
+  20          /**********************************************************************/
+  21          /*                串口初始化
+  22          *     波特率=11059200 / { 32×[65536-(RCAP2H,RCAP2L)] }    
+  23          *     其中的RCAP2H,RCAP2L为自动重装值，由上式得：
+  24          *     RCAP2H,RCAP2L=65536 11059200 / (32×波特率) 
+  25          *     得波特率为115200时，RCAP2H,RCAP2L=0xff
+  26          **********************************************************************/
+  27          void UART1_Init(void)                           //串口初始化115200波特率
+  28          {
+  29   1        SCON=0x50;                              //串口工作方式1，8位UART，波特率可变  
+  30   1        TH2=0xFF;           
+  31   1        TL2=0xFD;                               //波特率:115200 晶振=11.0592MHz 
+  32   1        RCAP2H=0xFF;   
+  33   1        RCAP2L=0xFD;                            //16位自动再装入值
+  34   1        TCLK=1;   
+  35   1        RCLK=1;   
+  36   1        C_T2=0;   
+  37   1        EXEN2=0;                              //波特率发生器工作方式
+  38   1        TR2=1;                                //定时器2开始
+  39   1        ES=1;
+  40   1        EA=1;
+  41   1        
+  42   1        
+  43   1        g_UsartRx.status = 0;
+  44   1        g_UsartRx.len = 0;
+  45   1      }
+  46          /**********************************************************************/
+  47          /*                串口发送于接收
+  48          /**********************************************************************/
+  49          void UART1_SendData(uint8_t dat)
+  50          {
+  51   1          while (B_TX1_Busy);                                 //等待前面的数据发送完成
+  52   1          B_TX1_Busy = 1;
+  53   1          SBUF = dat;                                     //写数据到Uart1数据寄存器
+  54   1      }
+C51 COMPILER V9.59.0.0   UARTCOM                                                           07/17/2019 13:14:20 PAGE 2   
+
+  55          void UART1_SendString(uint8_t *s)
+  56          {
+  57   1          while (*s)                                      //检测字符串结束标志
+  58   1          {
+  59   2              UART1_SendData(*s++);                           //发送当前字符
+  60   2          }
+  61   1      }
+  62          
+  63          
+  64          USARTMsgTypedef getUsart1Msg(void)
+  65          {
+  66   1        USARTMsgTypedef msg;
+  67   1        int i;
+  68   1        
+  69   1        if(g_UsartRx.status == 1)   //如果缓冲区锁定
+  70   1        {
+  71   2          msg.ID = g_UsartRx.buf[1];                //获取消息标识符
+  72   2          for(i = 0;i < g_UsartRx.len - 2;i++)  //提取数据
+  73   2          {
+  74   3            msg.msg[i] = g_UsartRx.buf[i + 2];
+  75   3          }
+  76   2          msg.len = g_UsartRx.len;                  //获得数据长度
+  77   2          g_UsartRx.status = 0;                     //缓冲区解锁
+  78   2        }
+  79   1        else
+  80   1        {
+  81   2          msg.len = 0;
+  82   2          msg.ID = 255;
+  83   2        }
+  84   1        return msg;                               //返回消息数据
+  85   1      }
+  86          
+  87          //Usart 1 Receive Function
+  88          void Usart1_Receive(void)
+  89          {
+  90   1        uint8_t bt; 
+  91   1        
+  92   1        bt = SBUF;//读取接收的字节
+  93   1        
+  94   1        if(g_UsartRx.status == 0)//当前消息未被锁定
+  95   1        {
+  96   2          if(bt == ENDBT)       //当前字节为结束标志
+  97   2          {
+  98   3            g_UsartRx.status = 1;//缓冲区锁定
+  99   3          }
+ 100   2          else
+ 101   2          {
+ 102   3            if(bt == STARTBT)//当前字节为开始标志
+ 103   3            {
+ 104   4              g_UsartRx.len = 0;
+ 105   4            }
+ 106   3            //将当前字节写入缓冲区
+ 107   3            g_UsartRx.buf[g_UsartRx.len] = bt;
+ 108   3            //移动写入下标并限制
+ 109   3            g_UsartRx.len = (g_UsartRx.len + 1) % 64;
+ 110   3          }
+ 111   2        }
+ 112   1      }
+ 113          
+ 114          
+ 115          /**********************************************************************/
+ 116          /*                串口中断
+C51 COMPILER V9.59.0.0   UARTCOM                                                           07/17/2019 13:14:20 PAGE 3   
+
+ 117          /**********************************************************************/
+ 118          void UART1_Int() interrupt 4                      //串口中断
+ 119          {
+ 120   1        if(RI)                                //接收中断标志位
+ 121   1        {
+ 122   2          RI = 0;
+ 123   2          //SBUF
+ 124   2          Usart1_Receive();
+ 125   2        }
+ 126   1        if(TI)                                //发送中断标志位
+ 127   1        {
+ 128   2          TI = 0;
+ 129   2          B_TX1_Busy = 0;                         //清除发送忙标志
+ 130   2        }
+ 131   1      }
+ 132            
+ 133            
+ 134            
+ 135            
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    308    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =     18      21
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      1    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

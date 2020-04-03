@@ -1,0 +1,8 @@
+".\Objects\Main.obj",
+".\Objects\KeyApp.obj",
+".\Objects\keyboard.obj",
+".\Objects\UartCom.obj",
+".\Objects\tim.obj",
+".\Objects\STARTUP.obj" 
+TO ".\Objects\keyboard" 
+PRINT(".\Listings\keyboard.m51")

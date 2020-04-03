@@ -1,0 +1,100 @@
+C51 COMPILER V9.59.0.0   KEYBOARD                                                          07/17/2019 16:43:45 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE KEYBOARD
+OBJECT MODULE PLACED IN .\Objects\keyboard.obj
+COMPILER INVOKED BY: D:\Keil_v5_C51\C51\BIN\C51.EXE Application\src\keyboard.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\A
+                    -pplication\inc) DEBUG OBJECTEXTEND PRINT(.\Listings\keyboard.lst) TABS(2) OBJECT(.\Objects\keyboard.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    keyboard.c
+   4            * @author  张东
+   5            * @version V1.0.0
+   6            * @date    2019-7-16
+   7            * @brief   矩阵键盘与独立键盘驱动程序
+   8            ******************************************************************************
+   9            */
+  10          #include "keyboard.h"
+  11          #include "reg52.h"
+  12          
+  13          
+  14          void outPort(uint8_t num,uint8_t dat)
+  15          {
+  16   1        switch(num)
+  17   1        {
+  18   2          case 0:P0 = dat;break;
+  19   2          case 1:P1 = dat;break;
+  20   2          case 2:P2 = dat;break;
+  21   2          default:P0 = dat;break;
+  22   2        }
+  23   1      }
+  24          uint8_t getPoart(uint8_t num)
+  25          {
+  26   1        switch(num)
+  27   1        {
+  28   2          case 0:return P0;break;
+  29   2          case 1:return P1;break;
+  30   2          case 2:return P2;break;
+  31   2          default:return P0;break;
+  32   2        }
+  33   1      }
+  34          
+  35          
+  36          /**
+  37            * @breif  矩阵键盘扫描程序.
+  38            * @note   支持更换port；
+  39            * @param  port序号0 1 2 .
+  40            * @retval none.
+  41            */
+  42          uint8_t MatrixKeyboardScan(uint8_t port)
+  43          {
+  44   1        uint8_t col,row;
+  45   1        
+  46   1        outPort(port,0x0f);           //拉高行
+  47   1        col =  getPoart(port) & 0x0f; //读取列
+  48   1        outPort(port,0xf0);           //拉高列
+  49   1        row =  getPoart(port) & 0xf0; //读取行
+  50   1        outPort(port,0xff);           //复位
+  51   1        
+  52   1        return ~((row|col)&0xff);
+  53   1      }
+  54          
+C51 COMPILER V9.59.0.0   KEYBOARD                                                          07/17/2019 16:43:45 PAGE 2   
+
+  55          /**
+  56            * @breif  矩阵键盘扫描程序.
+  57            * @note   支持更换port；
+  58            * @param  port序号0 1 2 .
+  59            * @retval none.
+  60            */
+  61          uint8_t IndependentKeyboardScan(uint8_t port)
+  62          {
+  63   1        outPort(port,0xff); 
+  64   1        return ~(getPoart(port) & 0x0f) & 0x0f;
+  65   1      }
+  66          
+  67          
+  68          
+  69          
+  70          
+  71          
+  72          
+  73          
+  74          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =     95    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

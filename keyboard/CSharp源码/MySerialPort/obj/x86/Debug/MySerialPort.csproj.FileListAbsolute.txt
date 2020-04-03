@@ -1,0 +1,10 @@
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\bin\x86\Debug\MySerialPort.exe.config
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\bin\x86\Debug\MySerialPort.exe
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\bin\x86\Debug\MySerialPort.pdb
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.csprojAssemblyReference.cache
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.Form1.resources
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.Properties.Resources.resources
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.csproj.GenerateResource.cache
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.csproj.CoreCompileInputs.cache
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.exe
+E:\WorkSpace\windows\C#\CSharp--SerialPort-master\MySerialPort\MySerialPort\obj\x86\Debug\MySerialPort.pdb

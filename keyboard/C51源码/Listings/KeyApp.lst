@@ -1,0 +1,238 @@
+C51 COMPILER V9.59.0.0   KEYAPP                                                            07/17/2019 16:54:20 PAGE 1   
+
+
+C51 COMPILER V9.59.0.0, COMPILATION OF MODULE KEYAPP
+OBJECT MODULE PLACED IN .\Objects\KeyApp.obj
+COMPILER INVOKED BY: D:\Keil_v5_C51\C51\BIN\C51.EXE Application\src\KeyApp.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(.\App
+                    -lication\inc) DEBUG OBJECTEXTEND PRINT(.\Listings\KeyApp.lst) TABS(2) OBJECT(.\Objects\KeyApp.obj)
+
+line level    source
+
+   1          /**
+   2            ******************************************************************************
+   3            * @file    UartCom.c
+   4            * @author  张东
+   5            * @version V1.0.0
+   6            * @date    2019-7-16
+   7            * @brief   串口驱动相关
+   8            ******************************************************************************
+   9            */
+  10            
+  11          /*Include start --------------------------------------------------------------*/
+  12          #include "keyApp.h"
+  13          #include "reg52.h"
+  14          
+  15          
+  16          #include "UartCom.h"
+  17          #include "keyboard.h"
+  18          #include "stdio.h"
+  19          
+  20          /*Include end ----------------------------------------------------------------*/
+  21          
+  22          /*Global Data Space start ----------------------------------------------------*/
+  23          
+  24          SysSetTypedef g_SysConfig; //系统设置
+  25          
+  26          StatusTypedef g_State = WITTING;
+  27          
+  28          /*Global Data Space end ------------------------------------------------------*/
+  29          
+  30          //软件延时毫秒
+  31          void delay_ms(uint16_t ms)
+  32          {
+  33   1        uint16_t i,j;
+  34   1        for(i = 0;i < ms;i++)
+  35   1        {
+  36   2          for(j = 0;j < 115;j++);
+  37   2        }
+  38   1      }
+  39          /*Communication And System Config---------------------------------------------*/
+  40          
+  41          /*MCU to PC------------------------------------------------------------*/
+  42          
+  43          uint8_t HexToChar(uint8_t hex)
+  44          {
+  45   1        uint8_t ch[16] = { '0','1','2','3','4','5','6','7',
+  46   1                           '8','9','A','B','C','D','E','F', };
+  47   1        return ch[hex];
+  48   1      }
+  49          
+  50          //PC消息发送定长5字节 <IXX>
+  51          void SendMsg(uint8_t ID,uint8_t dat)
+  52          {
+  53   1        uint8_t str[6];
+  54   1        
+C51 COMPILER V9.59.0.0   KEYAPP                                                            07/17/2019 16:54:20 PAGE 2   
+
+  55   1        str[0] = '<';                           //开始
+  56   1        str[1] = ID;                            //标识
+  57   1        str[2] = HexToChar((dat & 0xf0) >> 4);  //数据1
+  58   1        str[3] = HexToChar(dat & 0x0f);         //数据2
+  59   1        str[4] = '>';                           //结束
+  60   1        str[5] = 0;
+  61   1        
+  62   1        UART1_SendString(str);
+  63   1      }
+  64          
+  65          //上传数据到PC
+  66          void UpdataToPC(void)
+  67          {
+  68   1        static uint16_t div = 0;
+  69   1        uint8_t temp;
+  70   1        
+  71   1        div++;
+  72   1        if(div > 50)//  软件50分频
+  73   1        {
+  74   2          div = 0;
+  75   2          
+  76   2          //上传矩阵键盘数据
+  77   2          temp = MatrixKeyboardScan(g_SysConfig.MK_Port);
+  78   2          SendMsg('M',temp);
+  79   2          
+  80   2          delay_ms(10);
+  81   2          //上传独立键盘数据
+  82   2          temp = IndependentKeyboardScan(g_SysConfig.SK_Port);
+  83   2          SendMsg('S',temp);
+  84   2        }
+  85   1      }
+  86          
+  87          /*PC to MCU------------------------------------------------------------*/
+  88          //矩阵键盘port设置
+  89          void MatrixKeyboardPortSet(uint8_t * cmd)
+  90          {
+  91   1        switch(cmd[0])
+  92   1        {
+  93   2          case '0':
+  94   2          {
+  95   3            g_SysConfig.MK_Port = 0;
+  96   3            SendMsg('P',0x00);
+  97   3            break;
+  98   3          }   
+  99   2          case '1':
+ 100   2          {
+ 101   3            g_SysConfig.MK_Port = 1;
+ 102   3            SendMsg('P',0x01);
+ 103   3            break;
+ 104   3          }   
+ 105   2          case '2':
+ 106   2          {
+ 107   3            g_SysConfig.MK_Port = 2;
+ 108   3            SendMsg('P',0x02);
+ 109   3            break;
+ 110   3          }   
+ 111   2          default:
+ 112   2          {
+ 113   3            SendMsg('P',0x01);
+ 114   3            break;
+ 115   3          }
+ 116   2        }
+C51 COMPILER V9.59.0.0   KEYAPP                                                            07/17/2019 16:54:20 PAGE 3   
+
+ 117   1      }
+ 118          //独立键盘port设置
+ 119          void SKeyboardPortSet(uint8_t * cmd)
+ 120          {
+ 121   1        switch(cmd[0])
+ 122   1        {
+ 123   2          case '0':
+ 124   2          {
+ 125   3            g_SysConfig.SK_Port = 0;
+ 126   3            SendMsg('D',0x00);
+ 127   3            break;
+ 128   3          }   
+ 129   2          case '1':
+ 130   2          {
+ 131   3            g_SysConfig.SK_Port = 1;
+ 132   3            SendMsg('D',0x01);
+ 133   3            break;
+ 134   3          }   
+ 135   2          case '2':
+ 136   2          {
+ 137   3            g_SysConfig.SK_Port = 2;
+ 138   3            SendMsg('D',0x02);
+ 139   3            break;
+ 140   3          }   
+ 141   2          default:
+ 142   2          {
+ 143   3            SendMsg('D',0x01);
+ 144   3            break;
+ 145   3          }
+ 146   2        }
+ 147   1      }
+ 148          
+ 149          
+ 150          //串口通信解析程序
+ 151          void Packet_Analysis(void)                                      
+ 152          {
+ 153   1        USARTMsgTypedef usartMsg; //串口数据
+ 154   1        
+ 155   1        //获得串口消息
+ 156   1        usartMsg = getUsart1Msg();
+ 157   1        
+ 158   1        
+ 159   1        //开始消息内容解析
+ 160   1        switch(usartMsg.ID)
+ 161   1        {
+ 162   2          case 'P'://设定矩阵键盘port
+ 163   2          {
+ 164   3            MatrixKeyboardPortSet(usartMsg.msg);
+ 165   3            break;
+ 166   3          }
+ 167   2          case 'D'://设定独立键盘端口
+ 168   2          {
+ 169   3             SKeyboardPortSet(usartMsg.msg);
+ 170   3            break;
+ 171   3          }
+ 172   2          
+ 173   2          // null  msg
+ 174   2          case 255:break;
+ 175   2          
+ 176   2          default:
+ 177   2          {
+ 178   3            //func error feedback
+C51 COMPILER V9.59.0.0   KEYAPP                                                            07/17/2019 16:54:20 PAGE 4   
+
+ 179   3            //UART1_SendString("Error\n");
+ 180   3            break;
+ 181   3          }
+ 182   2        }
+ 183   1      }
+ 184          
+ 185          
+ 186          
+ 187          
+ 188          /*setup and loop function ----------------------------------------------------*/
+ 189          void setup(void)
+ 190          {
+ 191   1        //hard ware init
+ 192   1        UART1_Init();
+ 193   1        
+ 194   1        g_SysConfig.MK_Port = 0;
+ 195   1        g_SysConfig.SK_Port = 1;
+ 196   1        
+ 197   1        SendMsg('P',0x00);
+ 198   1        SendMsg('D',0x01);
+ 199   1      }
+ 200          
+ 201          
+ 202          void loop(void)
+ 203          { 
+ 204   1        Packet_Analysis();  
+ 205   1        
+ 206   1        UpdataToPC();
+ 207   1        
+ 208   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    367    ----
+   CONSTANT SIZE    =     16    ----
+   XDATA SIZE       =      9      42
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

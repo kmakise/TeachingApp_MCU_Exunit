@@ -1,0 +1,1 @@
+"Application\src\UartCom.c" LARGE OPTIMIZE (8,SPEED) BROWSE INCDIR(.\Application\inc) DEBUG OBJECTEXTEND PRINT(.\Listings\UartCom.lst) TABS (2) OBJECT(.\Objects\UartCom.obj)

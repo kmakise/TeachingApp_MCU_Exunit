@@ -1,0 +1,10 @@
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.csprojAssemblyReference.cache
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.Form1.resources
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.Properties.Resources.resources
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.csproj.GenerateResource.cache
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.csproj.CoreCompileInputs.cache
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\bin\x86\Release\LEDDisplay.exe.config
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\bin\x86\Release\LEDDisplay.exe
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\bin\x86\Release\LEDDisplay.pdb
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.exe
+E:\WorkSpace\windows\C#\LEDDisplay\LEDDisplay\obj\x86\Release\LEDDisplay.pdb
